@@ -14,7 +14,8 @@ s = pygame.display.set_mode(res)
 ball = pygame.image.load("ball.png")
 black = ball.copy()
 black.fill((0,0,0))
-ballRect = ball.get_rect()
+ballRect1 = ball.get_rect()
+ballRect2 = ball.get_rect()
 
 #Ball properties
 pos = v.Vector(4,5)		#Position
@@ -30,10 +31,22 @@ tBall.forces.append(ff.collision)
 tBall.forces.append(ff.normal)
 tBall.forces.append(ff.drag)
 tBall.forces.append(ff.mouse)
+tBall.forces.append(ff.other2)
 
-#Initially display the ball, then enter simulation loop
-s.blit(ball, ballRect)
-pygame.display.flip()
+ff.otherBall = tBall
+ff.otherBallK = 15
+
+#Create ball object and register force functions
+uBall = t.Thing(pos, m, vInit*-1, size, r)
+uBall.forces.append(ff.gravity)
+uBall.forces.append(ff.drag)
+uBall.forces.append(ff.normal)
+uBall.forces.append(ff.collision)
+uBall.forces.append(ff.other)
+
+ff.otherBall2 = uBall
+
+#Enter simulation loop
 run = True
 while run:
 	for e in pygame.event.get():			#Exit if close button is clicked or a key is pressed
@@ -41,7 +54,11 @@ while run:
 			run = False
 	clock.tick(framerate)					#Wait until the next frame
 	tBall.step(dt)							#Calculate next position
-	s.blit(black, ballRect)					#Black out the old ball
-	ballRect.center = tBall.getPos(res)		#Set new position
-	s.blit(ball, ballRect)					#Draw the new ball
+	uBall.step(dt)							#Calculate next position
+	s.blit(black, ballRect1)					#Black out the old ball
+	s.blit(black, ballRect2)					#Black out the old ball
+	ballRect1.center = tBall.getPos(res)		#Set new position
+	ballRect2.center = uBall.getPos(res)		#Set new position
+	s.blit(ball, ballRect1)					#Draw the new ball
+	s.blit(ball, ballRect2)					#Draw the new ball
 	pygame.display.flip()					#Update the screen
